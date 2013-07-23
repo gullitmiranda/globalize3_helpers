@@ -1,6 +1,7 @@
 module ActionView::Helpers
   class FormBuilder
-  
+
+
     def globalize_fields_for_locale(locale, *args, &proc)
       raise ArgumentError, "Missing block" unless block_given?
       @index = @index ? @index + 1 : 1

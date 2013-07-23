@@ -27,29 +27,35 @@ module ActionView::Helpers
       index = options[:child_index] || "#{self.object.class.to_s}-#{self.object.object_id}"
       linker = ActiveSupport::SafeBuffer.new
       fields = ActiveSupport::SafeBuffer.new
-      
+
       ::I18n.available_locales.each do |locale|
         active_class = ::I18n.locale == locale ? "in active" : ""
         url          = "lang-#{locale}-#{index}"
-        linker << self.template.content_tag(:li,
-          self.template.content_tag(:a,
+        linker << @template.content_tag(:li,
+          @template.content_tag(:a,
             ::I18n.t("translation.#{locale}"),
             :href => "##{url}",
             :"data-toggle" => "tab"
           ),
           class: "#{active_class}",
         )
-        fields << self.template.content_tag(:div,
-          self.semantic_fields_for(*(args.dup << self.object.translation_for(locale)), &proc),
+        fields_render = defined?(self.semantic_fields_for) ?
+          self.semantic_fields_for(*(args.dup << self.object.translation_for(locale)), &proc)
+          : self.fields_for(*(args.dup << self.object.translation_for(locale)), &proc)
+
+        # fields_render = self.semantic_fields_for(*(args.dup << self.object.translation_for(locale)), &proc),
+
+        fields << @template.content_tag(:div,
+          fields_render,
           :id => "#{url}",
           class: "tab-pane fade #{active_class}"
         )
       end
 
-      linker = self.template.content_tag(:ul, linker, class: "nav nav-tabs language-selection")
-      fields = self.template.content_tag(:div, fields, class: "tab-content")
+      linker = @template.content_tag(:ul, linker, class: "nav nav-tabs language-selection")
+      fields = @template.content_tag(:div, fields, class: "tab-content")
 
-      html = self.template.content_tag(:div,
+      html = @template.content_tag(:div,
         linker + fields,
         id: "language-tabs-#{index}",
         class: "tabbable tabs-left"
